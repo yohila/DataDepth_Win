@@ -1,0 +1,76 @@
+depth.halfspace (seulement exact)									Done					
+depth.potential (tout) > simple and fast = implement everything					Done
+depth.qhpeeling (tout) > v exact , procedure de qhull  barber (cython), Rpackage geometry		Done (Use Scipy)
+depth.simplicial (tout: les deux - exact et approximatif)						Done
+depth.simplicialVolume (tout: les deux - exact et approximatif)					Done
+depth.zonoid (seulement exact) 									Done
+depth.L2 (tout) > simple and fast = implement everything						Done				
+depth.spatial (tout) simple and fast = implement everything						Doen
+depth.betaSkeleton (tout) > simple and fast = implement everything					Done
+depth.Mahalanobis (seulement exact) MCD minimum covariance determinant > scikit-learn		Done
+
+
+		
+	if (!is.null(pretransform)) {
+        if (pretransform == "1Mom" || pretransform == "NMom") 
+            mm <- mah.moment(data)
+        else if (pretransform == "1MCD" || pretransform == 
+            "NMCD") 
+            mm <- mah.mcd(data, mah.parMcd)
+        transformer <- MahMomentTransformer(mm$mu, mm$b)
+        data <- transformer(data)
+        x <- transformer(x)
+    }
+    kernelType = kernel
+    if (is.character(kernelType)) 
+        kernelType = switch(kernelType, EDKernel = 1, GKernel = 2, 
+            EKernel = 3, TriangleKernel = 4, 1)
+ 
+
+    points2 <- as.vector(t(x))
+    numPoints2 <- nrow(x)
+    cardinalities = numPoints
+    classes <- 1
+    ignoreself = F
+
+
+
+mah.moment <- function(x){
+  mu <- colMeans(x)
+  
+  scale.eig <- eigen(cov(x))
+  B <- scale.eig$vectors %*% diag(sqrt(scale.eig$values)) 
+  B_inv <- solve(B)
+  return (list(mu = as.numeric(mu), b = B_inv, s = cov(x)))
+}
+
+def Maha_mcd(x, alpha =0.5):
+  #library(robustbase)
+  estimate = MCD_fun(data,alpha)
+  mu <- estimate$center
+  
+  scale.eig <- eigen(estimate$cov)
+  B <- scale.eig$vectors %*% diag(sqrt(scale.eig$values)) 
+  B_inv <- solve(B)
+  return (list(mu = as.numeric(mu), b = B_inv, s = estimate$cov))
+}
+
+mah.transform <- function (x, mu, B_inv, inv = F)  {
+  if (inv)
+    return (t(solve(B_inv) %*% (t(x))+mu))
+  return (t(B_inv %*% (t(x)-mu)))
+}
+
+mah.transform.back <- function (x, mu, B_inv)  {
+  return (t(solve(B_inv) %*% (t(x))+mu))
+}
+
+MahMomentTransformer <- function(mu, b){
+  f <- function(points, inv = F){
+    return(mah.transform(points, mu, b, inv))
+  }
+  environment(f) <- new.env()
+  environment(f)$mu = mu
+  environment(f)$b = b
+  return (f)
+}
