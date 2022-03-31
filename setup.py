@@ -21,8 +21,8 @@ setup(
         Extension(
             "ddalphacpp", 
             sources=["ddalphalearn/ddalphacpp/ddalpha.cpp"],
-            extra_compile_args=["-I."],
-            extra_link_args=["-rdynamic",'-std=c++11','-fPIC']
+            extra_compile_args=["-I."]
+            
         )
     ],
     zip_safe=False,
